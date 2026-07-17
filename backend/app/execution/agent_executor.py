@@ -55,9 +55,15 @@ class AgentExecutor:
         #
 
         execution_context.context = self.context_builder.build(
+
             project=execution_context.project,
+        
+            profile=execution_context.profile,
+        
             stage=execution_context.stage,
+        
             task=execution_context.task,
+        
         )
 
         #
@@ -104,9 +110,9 @@ class AgentExecutor:
         agent = self.registry.create(
 
             stage=execution_context.stage,
-        
+
             profile=execution_context.profile,
-        
+
         )
 
         #

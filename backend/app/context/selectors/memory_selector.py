@@ -1,76 +1,42 @@
 """
 Memory Selector
+===============
 
-Responsible for selecting only the memory
-required by the current stage.
+Loads only the memories permitted for the
+current workflow stage.
 
-It never reads memory directly.
+The permissions come directly from StageProfile.
 
-Instead it communicates through MemoryService.
+MemorySelector never hardcodes stage names.
 """
 
-from app.context.selectors.base_selector import BaseSelector
-from app.memory.service import MemoryService
+from app.memory.manager import MemoryManager
 
 
-class MemorySelector(BaseSelector):
+class MemorySelector:
 
     def __init__(self):
 
-        self.memory = MemoryService()
+        self.memory = MemoryManager()
 
     def load(
         self,
-        stage,
+        profile,
         project,
     ):
 
-        result = {}
+        context = {}
 
-        memory_map = {
+        for memory_name in profile.memories:
 
-            "ProductOwner": [
-                "business",
-                "workflow",
-            ],
-
-            "Architect": [
-                "business",
-                "architecture",
-            ],
-
-            "BackendDesigner": [
-                "architecture",
-                "decision",
-            ],
-
-            "FrontendDesigner": [
-                "architecture",
-            ],
-
-            "QA": [
-                "business",
-                "review",
-                "issues",
-            ],
-
-            "DevOps": [
-                "workflow",
-                "architecture",
-            ],
-
-        }
-
-        for memory in memory_map.get(stage, []):
-
-            result[memory] = self.memory.read(
-
-                stage=stage,
-
-                memory=memory,
-
-                key=project,
-
+            loader = getattr(
+                self.memory,
+                memory_name,
+                None,
             )
 
-        return result
+            if callable(loader):
+
+                context[memory_name] = loader(project)
+
+        return context

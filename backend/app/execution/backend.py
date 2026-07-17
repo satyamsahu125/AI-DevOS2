@@ -2,18 +2,21 @@
 Execution Backend
 =================
 
-Abstract interface for code execution engines.
+Abstract interface implemented by every
+code execution backend.
 
-Supported implementations
+Examples
 
 • Aider
 • OpenHands
+• Codex
 • Cursor
-• Future providers
 """
 
 from abc import ABC
 from abc import abstractmethod
+
+from app.execution.stage_artifact import StageArtifact
 
 
 class ExecutionBackend(ABC):
@@ -21,12 +24,12 @@ class ExecutionBackend(ABC):
     @abstractmethod
     def execute(
         self,
-        execution_plan,
-    ):
+        artifact: StageArtifact,
+        project,
+    ) -> StageArtifact:
         """
-        Executes one execution plan.
+        Execute a StageArtifact.
 
-        Returns
-        -------
-        ExecutionResult
+        Returns the updated artifact.
         """
+        raise NotImplementedError

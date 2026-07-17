@@ -1,44 +1,73 @@
 """
 Context Builder
+===============
 
-The Context Builder coordinates all selectors and
-constructs the AgentContext.
+Coordinates all context selectors and constructs
+the AgentContext used by an Agent.
 
-It NEVER reads memory directly.
-It NEVER scans the workspace.
-It NEVER loads documents.
+Responsibilities
+----------------
 
-Its only responsibility is orchestration.
+• Load permitted memories
+• Load workspace metadata
+• Load project documents
+• Load previous reviews
+• Load runtime memory
+• Apply context budget
+
+The Context Builder NEVER
+
+• Reads memory directly
+• Scans the filesystem
+• Executes agents
+• Calls the LLM
 """
 
-from app.context.context import AgentContext
 from app.context.budget import ContextBudget
+from app.context.context import AgentContext
 
-from app.context.selectors.memory_selector import MemorySelector
-from app.context.selectors.workspace_selector import WorkspaceSelector
 from app.context.selectors.document_selector import DocumentSelector
+from app.context.selectors.memory_selector import MemorySelector
 from app.context.selectors.review_selector import ReviewSelector
+from app.context.selectors.workspace_selector import WorkspaceSelector
+
+from app.memory.manager import MemoryManager
 
 
 class ContextBuilder:
 
     def __init__(self):
 
-        self.memory = MemorySelector()
+        self.memory_selector = MemorySelector()
 
-        self.workspace = WorkspaceSelector()
+        self.workspace_selector = WorkspaceSelector()
 
-        self.documents = DocumentSelector()
+        self.document_selector = DocumentSelector()
 
-        self.review = ReviewSelector()
+        self.review_selector = ReviewSelector()
+
+        #
+        # Runtime Memory
+        #
+
+        self.memory = MemoryManager()
 
         self.budget = ContextBudget()
 
+    # ---------------------------------------------------------
+
     def build(
+
         self,
-        project: str,
-        stage: str,
-        task: str,
+
+        project,
+
+        profile,
+
+        stage,
+
+        task,
+
     ) -> AgentContext:
 
         context = AgentContext(
@@ -51,26 +80,74 @@ class ContextBuilder:
 
         )
 
-        context.memory = self.memory.load(
+        #
+        # Runtime Memory
+        #
+
+        runtime = self.memory.runtime_store.get_or_create(
+
+            project.id,
+
             stage,
-            project,
+
         )
 
-        context.workspace = self.workspace.load(
-            stage,
-            project,
+        context.runtime = runtime
+
+        #
+        # Long-term Memories
+        #
+
+        context.memory = self.memory_selector.load(
+
+            profile=profile,
+
+            project=project,
+
         )
 
-        context.documents = self.documents.load(
-            stage,
-            project,
+        #
+        # Workspace
+        #
+
+        context.workspace = self.workspace_selector.load(
+
+            stage=stage,
+
+            project=project,
+
         )
 
-        context.review = self.review.load(
-            stage,
-            project,
+        #
+        # Documents
+        #
+
+        context.documents = self.document_selector.load(
+
+            stage=stage,
+
+            project=project,
+
         )
+
+        #
+        # Previous Reviews
+        #
+
+        context.review = self.review_selector.load(
+
+            stage=stage,
+
+            project=project,
+
+        )
+
+        #
+        # Apply Context Budget
+        #
 
         return self.budget.trim(
+
             context,
+
         )

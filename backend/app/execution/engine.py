@@ -59,4 +59,7 @@ class ExecutionEngine:
 
         """
 
-        return artifact
+        return self.backend.execute(
+            artifact,
+            project,
+        )
