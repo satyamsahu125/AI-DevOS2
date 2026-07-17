@@ -2,12 +2,9 @@
 Memory Selector
 ===============
 
-Loads only the memories permitted for the
-current workflow stage.
+Loads only memories allowed by the StageProfile.
 
-The permissions come directly from StageProfile.
-
-MemorySelector never hardcodes stage names.
+Memory permissions are defined ONLY in StageProfile.
 """
 
 from app.memory.manager import MemoryManager
@@ -15,14 +12,26 @@ from app.memory.manager import MemoryManager
 
 class MemorySelector:
 
-    def __init__(self):
+    def __init__(
 
-        self.memory = MemoryManager()
+        self,
+
+        manager: MemoryManager,
+
+    ):
+
+        self.manager = manager
+
+    # ---------------------------------------------------------
 
     def load(
+
         self,
+
         profile,
+
         project,
+
     ):
 
         context = {}
@@ -30,13 +39,21 @@ class MemorySelector:
         for memory_name in profile.memories:
 
             loader = getattr(
-                self.memory,
+
+                self.manager,
+
                 memory_name,
+
                 None,
+
             )
 
             if callable(loader):
 
-                context[memory_name] = loader(project)
+                context[memory_name] = loader(
+
+                    project,
+
+                )
 
         return context

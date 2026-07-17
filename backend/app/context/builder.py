@@ -2,11 +2,9 @@
 Context Builder
 ===============
 
-Coordinates all context selectors and constructs
-the AgentContext used by an Agent.
+Coordinates all selectors and constructs the AgentContext.
 
 Responsibilities
-----------------
 
 • Load permitted memories
 • Load workspace metadata
@@ -18,39 +16,40 @@ Responsibilities
 The Context Builder NEVER
 
 • Reads memory directly
-• Scans the filesystem
 • Executes agents
 • Calls the LLM
 """
 
-from app.context.budget import ContextBudget
 from app.context.context import AgentContext
+from app.context.budget import ContextBudget
 
-from app.context.selectors.document_selector import DocumentSelector
 from app.context.selectors.memory_selector import MemorySelector
-from app.context.selectors.review_selector import ReviewSelector
 from app.context.selectors.workspace_selector import WorkspaceSelector
+from app.context.selectors.document_selector import DocumentSelector
+from app.context.selectors.review_selector import ReviewSelector
 
 from app.memory.manager import MemoryManager
 
 
 class ContextBuilder:
 
-    def __init__(self):
+    def __init__(
 
-        self.memory_selector = MemorySelector()
+        self,
+
+        memory_manager: MemoryManager,
+
+    ):
+
+        self.memory = memory_manager
+
+        self.memory_selector = MemorySelector(self.memory)
 
         self.workspace_selector = WorkspaceSelector()
 
         self.document_selector = DocumentSelector()
 
         self.review_selector = ReviewSelector()
-
-        #
-        # Runtime Memory
-        #
-
-        self.memory = MemoryManager()
 
         self.budget = ContextBudget()
 
@@ -84,15 +83,10 @@ class ContextBuilder:
         # Runtime Memory
         #
 
-        runtime = self.memory.runtime_store.get_or_create(
-
+        context.runtime = self.memory.runtime(
             project.id,
-
             stage,
-
         )
-
-        context.runtime = runtime
 
         #
         # Long-term Memories
@@ -141,10 +135,6 @@ class ContextBuilder:
             project=project,
 
         )
-
-        #
-        # Apply Context Budget
-        #
 
         return self.budget.trim(
 

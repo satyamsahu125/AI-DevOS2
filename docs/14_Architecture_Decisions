@@ -1,0 +1,632 @@
+# AI DevOS — Architecture Decisions (ADRs)
+
+Version: 1.0
+
+---
+
+# Purpose
+
+This document records the major architectural decisions behind AI DevOS.
+
+Unlike implementation documents, ADRs explain **why** the architecture was designed this way.
+
+Each decision includes:
+
+- Problem
+- Decision
+- Alternatives
+- Consequences
+
+---
+
+# ADR-001
+
+## Stateless Agents
+
+### Problem
+
+Agents performing multiple responsibilities become difficult to maintain.
+
+Examples
+
+- memory loading
+- prompt building
+- workflow updates
+- provider communication
+
+Such agents quickly become tightly coupled.
+
+---
+
+### Decision
+
+Every agent in AI DevOS is completely stateless.
+
+Agents only transform
+
+```
+ExecutionContext
+
+↓
+
+StageArtifact
+```
+
+---
+
+### Alternatives Considered
+
+Stateful agents
+
+Pros
+
+- fewer framework classes
+
+Cons
+
+- hidden state
+- poor testing
+- tight coupling
+- difficult retries
+
+---
+
+### Consequences
+
+Advantages
+
+✓ deterministic execution
+
+✓ reusable agents
+
+✓ simpler testing
+
+✓ provider independence
+
+Tradeoff
+
+More orchestration classes.
+
+---
+
+# ADR-002
+
+## Centralized Memory Management
+
+### Problem
+
+Allowing every subsystem to write memory independently causes inconsistent knowledge.
+
+---
+
+### Decision
+
+Only MemoryManager owns memory.
+
+Writing path
+
+```
+Artifact
+
+↓
+
+Extraction Pipeline
+
+↓
+
+Memory Manager
+
+↓
+
+Provider
+```
+
+---
+
+### Alternatives
+
+Agents writing memory directly.
+
+Rejected because
+
+- duplicated formats
+- inconsistent ownership
+- memory corruption
+
+---
+
+### Consequences
+
+✓ single ownership
+
+✓ standardized memories
+
+✓ easier migration
+
+---
+
+# ADR-003
+
+## Workspace Registry Instead of Repository Scanning
+
+### Problem
+
+Scanning the repository before every execution is expensive.
+
+Large repositories increase latency.
+
+---
+
+### Decision
+
+Maintain a Workspace Registry containing indexed metadata.
+
+The Context Framework queries the registry instead of scanning files.
+
+---
+
+### Alternatives
+
+Filesystem traversal
+
+Rejected.
+
+Repository RAG
+
+Rejected as primary strategy.
+
+---
+
+### Consequences
+
+✓ deterministic execution
+
+✓ faster context building
+
+✓ scalable repositories
+
+Tradeoff
+
+Registry must remain synchronized.
+
+---
+
+# ADR-004
+
+## Context Builder Owns Context Construction
+
+### Problem
+
+Agents building their own context causes duplication and inconsistent prompts.
+
+---
+
+### Decision
+
+Only ContextBuilder constructs AgentContext.
+
+Agents receive fully prepared context.
+
+---
+
+### Alternatives
+
+Each agent loads memory independently.
+
+Rejected.
+
+---
+
+### Consequences
+
+✓ one source of truth
+
+✓ reusable context logic
+
+✓ simpler agents
+
+---
+
+# ADR-005
+
+## Provider Abstraction
+
+### Problem
+
+Direct provider usage couples business logic to one AI vendor.
+
+---
+
+### Decision
+
+Introduce
+
+```
+LLMManager
+
+↓
+
+LLMRuntime
+
+↓
+
+ProviderFactory
+
+↓
+
+BaseProvider
+```
+
+---
+
+### Alternatives
+
+Direct Gemini SDK.
+
+Direct Ollama API.
+
+Rejected.
+
+---
+
+### Consequences
+
+✓ provider independence
+
+✓ future extensibility
+
+✓ vendor replacement
+
+---
+
+# ADR-006
+
+## Separate Generation From Review
+
+### Problem
+
+An agent cannot objectively evaluate its own work.
+
+---
+
+### Decision
+
+Introduce an independent Review Framework.
+
+```
+Agent
+
+↓
+
+Reviewer
+
+↓
+
+Approved?
+```
+
+---
+
+### Alternatives
+
+Self-review.
+
+Rejected.
+
+---
+
+### Consequences
+
+✓ higher quality
+
+✓ retry support
+
+✓ better architecture
+
+---
+
+# ADR-007
+
+## Stage Session Is Temporary
+
+### Problem
+
+Permanent conversations consume memory and leak obsolete context.
+
+---
+
+### Decision
+
+StageSession exists only while a stage executes.
+
+Destroyed immediately after approval.
+
+---
+
+### Alternatives
+
+Persistent conversations.
+
+Rejected.
+
+---
+
+### Consequences
+
+✓ predictable execution
+
+✓ reduced memory
+
+✓ isolated retries
+
+---
+
+# ADR-008
+
+## Approved Knowledge Only
+
+### Problem
+
+Rejected artifacts should never become project knowledge.
+
+---
+
+### Decision
+
+Only approved artifacts enter long-term memory.
+
+Rejected artifacts remain inside StageSession only.
+
+---
+
+### Consequences
+
+✓ clean knowledge base
+
+✓ reliable retrieval
+
+---
+
+# ADR-009
+
+## One Responsibility Per Framework
+
+### Problem
+
+Large frameworks become difficult to evolve.
+
+---
+
+### Decision
+
+Each framework owns one subsystem.
+
+Examples
+
+Workflow
+
+Execution
+
+Memory
+
+Review
+
+Workspace
+
+LLM
+
+Context
+
+---
+
+### Consequences
+
+✓ low coupling
+
+✓ independent evolution
+
+✓ easier testing
+
+---
+
+# ADR-010
+
+## Metadata Instead of Source Code
+
+### Problem
+
+Loading complete repositories into prompts is expensive.
+
+---
+
+### Decision
+
+Workspace Registry stores metadata only.
+
+Source code remains on disk.
+
+---
+
+### Consequences
+
+✓ lightweight context
+
+✓ scalable projects
+
+Tradeoff
+
+Future source retrieval still required.
+
+---
+
+# ADR-011
+
+## Runtime Memory Is Separate
+
+### Problem
+
+Temporary execution state should not pollute project knowledge.
+
+---
+
+### Decision
+
+Runtime Memory exists independently from Long-Term Memory.
+
+Destroyed after execution.
+
+---
+
+### Consequences
+
+✓ clean knowledge
+
+✓ isolated retries
+
+✓ deterministic execution
+
+---
+
+# ADR-012
+
+## Prompt Templates Outside Python
+
+### Problem
+
+Hardcoded prompts are difficult to maintain.
+
+---
+
+### Decision
+
+Store prompts as Markdown templates.
+
+Load using PromptLoader.
+
+---
+
+### Consequences
+
+✓ versionable prompts
+
+✓ editable by non-developers
+
+✓ cleaner code
+
+---
+
+# ADR-013
+
+## Configuration Outside Code
+
+### Problem
+
+Embedding provider configuration inside source code prevents deployment flexibility.
+
+---
+
+### Decision
+
+Externalize configuration.
+
+Examples
+
+- config.yaml
+
+- .env
+
+---
+
+### Consequences
+
+✓ environment independence
+
+✓ cloud readiness
+
+---
+
+# ADR-014
+
+## Explicit Dependency Direction
+
+### Decision
+
+Dependencies always flow downward.
+
+```
+API
+
+↓
+
+Workflow
+
+↓
+
+Execution
+
+↓
+
+Context
+
+↓
+
+Agent
+
+↓
+
+LLM
+
+↓
+
+Provider
+```
+
+Reverse dependencies are prohibited.
+
+---
+
+### Consequences
+
+✓ no circular imports
+
+✓ modular design
+
+---
+
+# ADR-015
+
+## Framework-Driven Architecture
+
+### Decision
+
+AI DevOS is designed as cooperating frameworks rather than one monolithic application.
+
+Frameworks
+
+- Workflow
+
+- Context
+
+- Agent
+
+- LLM
+
+- Review
+
+- Memory
+
+- Workspace
+
+- Execution
+
+Each framework evolves independently.
+
+---
+
+# Summary
+
+These Architecture Decision Records document the reasoning behind AI DevOS.
+
+As the project evolves, new ADRs should be added whenever significant architectural decisions are made.
+
+Existing ADRs should never be silently modified; instead, new ADRs should supersede earlier ones while preserving the historical rationale behind the system's evolution.

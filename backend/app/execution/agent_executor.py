@@ -34,14 +34,18 @@ class AgentExecutor:
 
         self.sessions = SessionManager()
 
-        self.context_builder = ContextBuilder()
-
+       
         self.prompt_composer = PromptComposer()
 
         self.review = ReviewEngine()
 
         self.memory = MemoryManager()
 
+        self.context_builder = ContextBuilder(
+        
+            self.memory,
+
+        )
         self.registry = AgentRegistry()
         self.llm = LLMManager()
 

@@ -2,26 +2,13 @@
 Execution Engine
 ================
 
-Only component allowed to modify
-the project workspace.
+Coordinates external code execution.
 
-Responsibilities
-
-• Execute stage artifacts
-• Create files
-• Update files
-• Delete files
-• Notify Workspace Registry
-
-Future
-
-• Aider
-• OpenHands
-• Codex
-• Cursor
+The engine delegates execution to the configured backend.
 """
 
-from app.workspace.registry import WorkspaceRegistry
+from app.execution.aider.aider_backend import AiderBackend
+from app.workspace.registry.workspace_registry import WorkspaceRegistry
 
 
 class ExecutionEngine:
@@ -30,7 +17,9 @@ class ExecutionEngine:
 
         self.workspace = WorkspaceRegistry()
 
-    # -----------------------------------------------------
+        self.backend = AiderBackend()
+
+    # ---------------------------------------------------------
 
     def execute(
 
@@ -42,24 +31,10 @@ class ExecutionEngine:
 
     ):
 
-        """
-        Execute a StageArtifact.
-
-        Current Version
-
-        Placeholder.
-
-        Future
-
-        • Create files
-
-        • Modify files
-
-        • Run Aider
-
-        """
-
         return self.backend.execute(
+
             artifact,
+
             project,
+
         )
