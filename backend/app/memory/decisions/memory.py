@@ -1,0 +1,3 @@
+class DecisionMemory:
+
+    NAME = "decision"

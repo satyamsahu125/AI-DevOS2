@@ -1,0 +1,167 @@
+Folder PATH listing for volume DATA
+Volume serial number is 000000BA 729C:1CB0
+F:.
+|   backend_tree.txt
+|   
+\---app
+    |   __init__.py
+    |   
+    +---agents
+    |   |   capabilities.py
+    |   |   profile.py
+    |   |   registry.py
+    |   |   __init__.py
+    |   |   
+    |   +---base
+    |   |       base_agent.py
+    |   |       
+    |   +---prompts
+    |   |       architect.py
+    |   |       backend.py
+    |   |       builder.py
+    |   |       devops.py
+    |   |       file_planner.py
+    |   |       frontend.py
+    |   |       product_owner.py
+    |   |       qa.py
+    |   |       registry.py
+    |   |       reviewer.py
+    |   |       
+    |   +---registry
+    |   |       profile.py
+    |   |       profiles.py
+    |   |       
+    |   \---stages
+    |           architect.py
+    |           backend_designer.py
+    |           devops.py
+    |           file_planner.py
+    |           frontend_designer.py
+    |           product_owner.py
+    |           qa_engineer.py
+    |           
+    +---api
+    |   \---routes
+    +---context
+    |   |   budget.py
+    |   |   builder.py
+    |   |   context.py
+    |   |   __init__.py
+    |   |   
+    |   \---selectors
+    |           document_selector.py
+    |           memory_selector.py
+    |           review_selector.py
+    |           workspace_selector.py
+    |           
+    +---core
+    |   |   __init__.py
+    |   |   
+    |   +---config
+    |   |       config_loader.py
+    |   |       constants.py
+    |   |       settings.py
+    |   |       __init__.py
+    |   |       
+    |   +---exceptions
+    |   |       exceptions.py
+    |   |       __init__.py
+    |   |       
+    |   \---logging
+    |           logger.py
+    |           __init__.py
+    |           
+    +---database
+    +---execution
+    |   |   execution_context.py
+    |   |   result.py
+    |   |   
+    |   +---aider
+    |   \---planner
+    +---executor
+    |       agent_executor.py
+    |       
+    +---kernel
+    |       ai_kernel.py
+    |       dispatcher.py
+    |       events.py
+    |       event_bus.py
+    |       __init__.py
+    |       
+    +---llm
+    |   |   base.py
+    |   |   chat_request.py
+    |   |   chat_response.py
+    |   |   manager.py
+    |   |   schemas.py
+    |   |   __init__.py
+    |   |   
+    |   \---providers
+    +---memory
+    |   |   manager.py
+    |   |   models.py
+    |   |   provider.py
+    |   |   storage.py
+    |   |   __init__.py
+    |   |   
+    |   +---architecture
+    |   |       memory.py
+    |   |       __init__.py
+    |   |       
+    |   +---business
+    |   |       memory.py
+    |   |       __init__.py
+    |   |       
+    |   +---decisions
+    |   |       memory.py
+    |   |       __init__.py
+    |   |       
+    |   +---issues
+    |   |       memory.py
+    |   |       __init__.py
+    |   |       
+    |   +---review
+    |   |       memory.py
+    |   |       __init__.py
+    |   |       
+    |   +---runtime
+    |   |       memory.py
+    |   |       __init__.py
+    |   |       
+    |   \---workflow
+    |           memory.py
+    |           __init__.py
+    |           
+    +---models
+    +---orchestration
+    |   +---dependency
+    |   +---impact
+    |   +---planner
+    |   \---workflow
+    +---prompts
+    |       composer.py
+    |       formatter.py
+    |       loader.py
+    |       __init__.py
+    |       
+    +---review
+    |   +---parser
+    |   \---planner
+    +---session
+    |   |   message.py
+    |   |   session_manager.py
+    |   |   session_store.py
+    |   |   stage_session.py
+    |   |   __init__.py
+    |   |   
+    |   \---cache
+    |           message.py
+    |           
+    +---state
+    |   +---project
+    |   \---workflow
+    +---utils
+    \---workspace
+        +---parser
+        +---registry
+        \---selector

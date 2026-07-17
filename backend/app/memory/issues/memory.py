@@ -1,0 +1,3 @@
+class IssueMemory:
+
+    NAME = "issue"

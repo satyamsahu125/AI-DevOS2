@@ -1,0 +1,3 @@
+class BusinessMemory:
+
+    NAME = "business"

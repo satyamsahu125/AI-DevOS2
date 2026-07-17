@@ -1,0 +1,3 @@
+class WorkflowMemory:
+
+    NAME = "workflow"

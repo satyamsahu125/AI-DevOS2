@@ -1,0 +1,3 @@
+class ArchitectureMemory:
+
+    NAME = "architecture"
